@@ -20,7 +20,8 @@ from utils import get_default_img_feat_path
 
 MAX_LEN = 20
 
-def infer(test_reader,  use_cuda=False, model_path=None):
+
+def infer(test_reader, use_cuda=False, model_path=None):
     """
     inference function
     """
@@ -40,7 +41,7 @@ def infer(test_reader,  use_cuda=False, model_path=None):
     # init paddlepaddle
     place = fluid.CUDAPlace(0) if use_cuda else fluid.CPUPlace()
     exe = fluid.Executor(place)
-    feeder = fluid.DataFeeder(feed_list=[hidden,cell,pre_word], place=place)
+    feeder = fluid.DataFeeder(feed_list=[hidden, cell, pre_word], place=place)
     inference_scope = fluid.core.Scope()
 
     ##
@@ -55,8 +56,6 @@ def infer(test_reader,  use_cuda=False, model_path=None):
             # words_index = [d[0] for d in data_]
             words = [reverse_word_dict[d] for d in data_[1]]
 
-
-
             img_feat, word_list = data_
             prev_hidden_, prev_cell_, prediction = img_feat, img_feat, start_word_id
             prediction_list = []
@@ -65,29 +64,30 @@ def infer(test_reader,  use_cuda=False, model_path=None):
             for ii in range(MAX_LEN):
                 if ii == 0:
                     # data_lstm = [(start_word_id, start_word_id, img_feat, img_feat)]
-                    data_lstm = [[prev_hidden_, prev_cell_,start_word_id]]
-                    prediction, prev_hidden, prev_cell = exe.run(inference_program,
-                                                                                feed=feeder.feed(data_lstm),
-                                                                                fetch_list=fetch_targets,
-                                                                                return_numpy=True)
+                    data_lstm = [[prev_hidden_, prev_cell_, start_word_id]]
+                    prediction, prev_hidden, prev_cell = exe.run(
+                        inference_program,
+                        feed=feeder.feed(data_lstm),
+                        fetch_list=fetch_targets,
+                        return_numpy=True)
 
                     prediction = prediction[0].argmax()
                 else:
                     # pre_words = word_list[ii - 1]
-                    data_lstm = [[ prev_hidden_, prev_cell_,prediction]]
+                    data_lstm = [[prev_hidden_, prev_cell_, prediction]]
 
-                    prediction, prev_hidden, prev_cell = exe.run(inference_program,
-                                                                                feed=feeder.feed(data_lstm),
-                                                                                fetch_list=fetch_targets,
-                                                                                return_numpy=True)
+                    prediction, prev_hidden, prev_cell = exe.run(
+                        inference_program,
+                        feed=feeder.feed(data_lstm),
+                        fetch_list=fetch_targets,
+                        return_numpy=True)
                     prediction = prediction[0].argmax()
                 prediction_list.append(prediction)
 
                 if prediction == end_word_id:
                     break
 
-
-            prediction_tag = [  reverse_word_dict[p] for p in prediction_list ]
+            prediction_tag = [reverse_word_dict[p] for p in prediction_list]
 
             prediction_words = " ".join(prediction_tag)
             source_words = " ".join(words)
@@ -118,7 +118,8 @@ if __name__ == "__main__":
 
     ## we use the reader.train_reader to read the testing data.
     logger.info("loading test reader")
-    test_reader = reader.train_reader(test_features_path, img2sent_dict, word_dict)
+    test_reader = reader.train_reader(test_features_path, img2sent_dict,
+                                      word_dict)
 
     ## running model infer ...
     logger.info("running model infer ...")

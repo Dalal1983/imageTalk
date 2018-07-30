@@ -12,6 +12,7 @@ import scipy.io
 from utils import load_default_data
 from utils import get_default_img_feat_path
 
+
 def import_fluid():
     import paddle.fluid as fluid
     return fluid
@@ -35,7 +36,6 @@ def load_data(imgfile, shape):
     mean = mean.reshape([3, 1, 1])
     im = im - mean
     return im.reshape([1] + shape)
-
 
 
 def get_shape(fluid, program, name):
@@ -75,15 +75,18 @@ def reduce_along_dim(img, dim, weights, indicies):
     '''
     other_dim = abs(dim - 1)
     if other_dim == 0:  # resizing image width
-        weights = np.tile(weights[np.newaxis, :, :, np.newaxis], (img.shape[other_dim], 1, 1, 3))
+        weights = np.tile(weights[np.newaxis, :, :, np.newaxis],
+                          (img.shape[other_dim], 1, 1, 3))
         out_img = img[:, indicies, :] * weights
         out_img = np.sum(out_img, axis=2)
     else:  # resize image height
-        weights = np.tile(weights[:, :, np.newaxis, np.newaxis], (1, 1, img.shape[other_dim], 3))
+        weights = np.tile(weights[:, :, np.newaxis, np.newaxis],
+                          (1, 1, img.shape[other_dim], 3))
         out_img = img[indicies, :, :] * weights
         out_img = np.sum(out_img, axis=1)
 
     return out_img
+
 
 def extract_feats(model_path, path_imgs):
     '''
@@ -115,14 +118,14 @@ def extract_feats(model_path, path_imgs):
         np_images = np.array(load_data(path_imgs[i], input_shape))
 
         predictions = exe.run(program=program,
-                          feed={input_name: np_images},
-                          fetch_list=fetch_targets)
+                              feed={input_name: np_images},
+                              fetch_list=fetch_targets)
 
         feats[:, i] = predictions[0]
 
         print "%d out of %d done....." % (i, len(path_imgs))
         end_time = time.time()
-        print("Duration time = %.4f"%(end_time - start_time))
+        print("Duration time = %.4f" % (end_time - start_time))
         start_time = end_time
 
     return feats
@@ -131,17 +134,20 @@ def extract_feats(model_path, path_imgs):
 if __name__ == "__main__":
     """ maybe more convenient to use 'run.sh' to call this tool
     """
-    default_data_train_dir, default_data_test_dir, tar_token_filename = load_default_data()
+    default_data_train_dir, default_data_test_dir, tar_token_filename = load_default_data(
+    )
 
     weight_file = './caffe2fluid/fluid'
     feats_save_path = get_default_img_feat_path()
-    for i,data_dir in enumerate([default_data_train_dir, default_data_test_dir]):
+    for i, data_dir in enumerate(
+        [default_data_train_dir, default_data_test_dir]):
 
         file_list = os.listdir(data_dir)
-        file_list = [os.path.join(data_dir, img_path) for img_path in file_list]
+        file_list = [
+            os.path.join(data_dir, img_path) for img_path in file_list
+        ]
         feats = extract_feats(weight_file, file_list)
         vgg_feats = {}
         vgg_feats['feats'] = feats
         vgg_feats['img_paths'] = file_list
         scipy.io.savemat(feats_save_path[i], vgg_feats)
-

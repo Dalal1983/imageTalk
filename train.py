@@ -16,8 +16,9 @@ import paddle.v2 as paddle
 import reader
 from utils import logger, parse_train_cmd, build_dict, load_pkl, load_default_data
 from utils import get_default_dict_path, get_default_img_feat_path
-from network_conf import lstm_cell, lstm_net, lstm_prediction,lstm_main
+from network_conf import lstm_cell, lstm_net, lstm_prediction, lstm_main
 from paddle.fluid.layers import lstm_unit
+
 
 def train(train_features_path=None,
           test_features_path=None,
@@ -55,7 +56,8 @@ def train(train_features_path=None,
                      "use flickr30k-images to train the model."))
 
         logger.info("downloading flickr30k-images ...")
-        default_data_train_dir, default_data_test_dir, tar_token_filename= load_default_data()
+        default_data_train_dir, default_data_test_dir, tar_token_filename = load_default_data(
+        )
 
         logger.info("define default path ...")
         img2sent_dict_path, word_dict_path = get_default_dict_path()
@@ -68,13 +70,13 @@ def train(train_features_path=None,
 
             # build the word dictionary to map the original string-typed
             # words into integer-typed index
-            build_dict(tar_token_filename,
-                       img2sent_dict_path,
-                       word_dict_path,
-                       minCount=5)
+            build_dict(
+                tar_token_filename,
+                img2sent_dict_path,
+                word_dict_path,
+                minCount=5)
 
     logger.info("the word dictionary path is %s" % word_dict_path)
-
 
     # get index info
     img2sent_dict = load_pkl(img2sent_dict_path)
@@ -82,17 +84,17 @@ def train(train_features_path=None,
     word_num = len(word_dict)
     logger.info("word number is : %d." % (word_num))
 
-
     # get train data reader
     train_reader = paddle.reader.shuffle(
-            reader.train_reader(train_features_path,img2sent_dict,word_dict),
-            buf_size=5120)
+        reader.train_reader(train_features_path, img2sent_dict, word_dict),
+        buf_size=5120)
 
     # get test data reader
     if train_features_path is not None:
         # here, because training and testing data share a same format,
         # we still use the reader.train_reader to read the testing data.
-        test_reader = reader.train_reader(test_features_path,img2sent_dict,word_dict)
+        test_reader = reader.train_reader(test_features_path, img2sent_dict,
+                                          word_dict)
     else:
         test_reader = None
 
@@ -108,13 +110,13 @@ def train(train_features_path=None,
 
     # return the network result
     cost, acc, prediction, prev_hidden, prev_cell = lstm_main(
-              word_dict_dim=dict_dim,
-              prev_hidden=hidden,
-              prev_cell=cell,
-              lstm_him_dim=128,
-              emb_dim=128,
-              pre_word=pre_word,
-              word=label)
+        word_dict_dim=dict_dim,
+        prev_hidden=hidden,
+        prev_cell=cell,
+        lstm_him_dim=128,
+        emb_dim=128,
+        pre_word=pre_word,
+        word=label)
 
     # create optimizer
     sgd_optimizer = fluid.optimizer.Adam(learning_rate=learning_rate)
@@ -123,7 +125,8 @@ def train(train_features_path=None,
     # create trainer
     place = fluid.CUDAPlace(0) if use_cuda else fluid.CPUPlace()
     exe = fluid.Executor(place)
-    feeder = fluid.DataFeeder(feed_list=[ label, pre_word, hidden, cell ], place=place)
+    feeder = fluid.DataFeeder(
+        feed_list=[label, pre_word, hidden, cell], place=place)
 
     # initialize training network
     exe.run(fluid.default_startup_program())
@@ -138,22 +141,23 @@ def train(train_features_path=None,
 
             img_feat, word_list = data_
             prev_hidden_, prev_cell_ = img_feat, img_feat
-            for ii,word in enumerate(word_list):
+            for ii, word in enumerate(word_list):
 
                 if ii == 0:
                     pre_words = word
-                    data_lstm = [[ word, pre_words, prev_hidden_, prev_cell_]]
-                    avg_cost_np, avg_acc_np, prev_hidden_, prev_cell_ = exe.run(prog,
-                                                      feed=feeder.feed(data_lstm),
-                                                      fetch_list=[cost, acc, prev_hidden, prev_cell])
+                    data_lstm = [[word, pre_words, prev_hidden_, prev_cell_]]
+                    avg_cost_np, avg_acc_np, prev_hidden_, prev_cell_ = exe.run(
+                        prog,
+                        feed=feeder.feed(data_lstm),
+                        fetch_list=[cost, acc, prev_hidden, prev_cell])
 
                 else:
-                    pre_words = word_list[ ii-1 ]
-                    data_lstm = [[ word, pre_words, prev_hidden_, prev_cell_]]
-                    avg_cost_np, avg_acc_np, prev_hidden_, prev_cell_ = exe.run(prog,
-                                                      feed=feeder.feed(data_lstm),
-                                                      fetch_list=[cost, acc, prev_hidden, prev_cell])
-
+                    pre_words = word_list[ii - 1]
+                    data_lstm = [[word, pre_words, prev_hidden_, prev_cell_]]
+                    avg_cost_np, avg_acc_np, prev_hidden_, prev_cell_ = exe.run(
+                        prog,
+                        feed=feeder.feed(data_lstm),
+                        fetch_list=[cost, acc, prev_hidden, prev_cell])
 
             data_size = len(word_list)
             total_acc += data_size * avg_acc_np
@@ -161,9 +165,9 @@ def train(train_features_path=None,
             data_count += data_size
 
             if (i + 5) % 10 == 0:
-                logger.info("pass_id: %d, batch %d, avg_acc: %f, avg_cost: %f" %
-                            (pass_id, i + 1, total_acc / data_count,
-                             total_cost / data_count))
+                logger.info("pass_id: %d, batch %d, avg_acc: %f, avg_cost: %f"
+                            % (pass_id, i + 1, total_acc / data_count,
+                               total_cost / data_count))
 
         avg_cost = total_cost / data_count
         avg_acc = total_acc / data_count
@@ -181,20 +185,24 @@ def train(train_features_path=None,
                 for ii, word in enumerate(word_list):
                     if ii == 0:
                         pre_words = word
-                        data_lstm = [[word, pre_words, prev_hidden_, prev_cell_]]
-                        avg_cost_np, avg_acc_np, prev_hidden_, prev_cell_ = exe.run(prog,
-                                                                                    feed=feeder.feed(data_lstm),
-                                                                                    fetch_list=[cost, acc, prev_hidden,
-                                                                                                prev_cell])
+                        data_lstm = [[
+                            word, pre_words, prev_hidden_, prev_cell_
+                        ]]
+                        avg_cost_np, avg_acc_np, prev_hidden_, prev_cell_ = exe.run(
+                            prog,
+                            feed=feeder.feed(data_lstm),
+                            fetch_list=[cost, acc, prev_hidden, prev_cell])
 
                     else:
                         pre_words = word_list[ii - 1]
-                        data_lstm = [[word, pre_words, prev_hidden_, prev_cell_]]
+                        data_lstm = [[
+                            word, pre_words, prev_hidden_, prev_cell_
+                        ]]
 
-                        avg_cost_np, avg_acc_np, prev_hidden_, prev_cell_ = exe.run(prog,
-                                                                                    feed=feeder.feed(data_lstm),
-                                                                                    fetch_list=[cost, acc, prev_hidden,
-                                                                                                prev_cell])
+                        avg_cost_np, avg_acc_np, prev_hidden_, prev_cell_ = exe.run(
+                            prog,
+                            feed=feeder.feed(data_lstm),
+                            fetch_list=[cost, acc, prev_hidden, prev_cell])
 
                 data_size = len(word_list)
                 total_acc += data_size * avg_acc_np
@@ -204,17 +212,20 @@ def train(train_features_path=None,
 
             avg_cost = total_cost / data_count
             avg_acc = total_acc / data_count
-            logger.info("Test result -- pass_id: %d,  avg_acc: %f, avg_cost: %f"
-                        % (pass_id, avg_acc, avg_cost))
+            logger.info(
+                "Test result -- pass_id: %d,  avg_acc: %f, avg_cost: %f" %
+                (pass_id, avg_acc, avg_cost))
 
         ## save inference model
-        epoch_model = model_save_dir + "/" + "img2sentence_epoch" + str(
-            pass_id % 5)
+        epoch_model = model_save_dir + "/" + "img2sentence_epoch" + str(pass_id
+                                                                        % 5)
         logger.info("Saving inference model at %s" % (epoch_model))
 
         ##prediction is the topology return value
         ##if we use the prediction value as the infer result
-        fluid.io.save_inference_model(epoch_model, ["hidden","cell","pre_words"], [prediction, prev_hidden, prev_cell], exe)
+        fluid.io.save_inference_model(
+            epoch_model, ["hidden", "cell", "pre_words"],
+            [prediction, prev_hidden, prev_cell], exe)
 
     logger.info("Training has finished.")
 

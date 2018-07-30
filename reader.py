@@ -9,6 +9,7 @@ import scipy.io
 import random
 from utils import load_pkl
 
+
 def train_reader(img_feats_path, img2sent_dict, word_dict):
     """
     Reader interface for training data
@@ -22,6 +23,7 @@ def train_reader(img_feats_path, img2sent_dict, word_dict):
 
 
     """
+
     def reader():
 
         features_struct = scipy.io.loadmat(img_feats_path)
@@ -36,10 +38,7 @@ def train_reader(img_feats_path, img2sent_dict, word_dict):
             sentence = random.choice(img2sent_dict[img_name])
             sentId = [word_dict[w] for w in sentence if w in word_dict.keys()]
 
-            feat = feats[:,i]
+            feat = feats[:, i]
             yield feat, sentId
 
     return reader
-
-
-

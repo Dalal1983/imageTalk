@@ -261,12 +261,13 @@ class Network(object):
     @layer
     def lrn(self, input, radius, alpha, beta, name, bias=1.0):
         fluid = import_fluid()
-        output = fluid.layers.lrn(input=input,
-                                  n=radius,
-                                  k=bias,
-                                  alpha=alpha,
-                                  beta=beta,
-                                  name=self.get_unique_output_name(name, 'lrn'))
+        output = fluid.layers.lrn(
+            input=input,
+            n=radius,
+            k=bias,
+            alpha=alpha,
+            beta=beta,
+            name=self.get_unique_output_name(name, 'lrn'))
         return output
 
     @layer
@@ -314,8 +315,7 @@ class Network(object):
                     str(shape))
             input = fluid.layers.reshape(input, shape[0:2])
 
-        output = fluid.layers.softmax(
-            input)
+        output = fluid.layers.softmax(input)
         return output
 
     @layer

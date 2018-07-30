@@ -119,12 +119,12 @@ pass_id: 0, batch 106, avg_acc: 0.782906, avg_cost: 1.076173
     ```
      10002456.jpg#0  Several men in hard hats are operating a giant pulley system .
      10002456.jpg#1  Workers look down from up above on a piece of equipment .
-	```
+    ```
 
 2. 编写数据读取接口
 
     自定义数据读取接口只需编写一个 Python 生成器实现**从原始输入文本中解析一条训练样本**的逻辑。
-    
+
     - 详见本例目录下的 `reader.py` 脚本，`reader.py` 提供了读取测试数据的全部代码。
 
     接下来，只需要将数据读取函数 `train_reader` 作为参数传递给 `train.py` 脚本中的 `paddle.batch` 接口即可使用自定义数据接口读取数据，调用方式如下：
