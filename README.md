@@ -1,8 +1,8 @@
-Please use PaddlePaddle v0.11.0 or a higher version for operation of the program under the category. If your PaddlePaddle is of a lower version, please refer to instructions in the installation file (http://www.paddlepaddle.org/docs/develop/documentation/zh/build_and_install/pip_install_cn.html)  for update of your PaddlePaddle. 
-
+Please use PaddlePaddle v0.11.0 or a higher version for operation of the program under the category. If your PaddlePaddle is of a lower version, please refer to instructions in the [installation file](http://www.paddlepaddle.org/docs/develop/documentation/zh/build_and_install/pip_install_cn.html)  for update of your PaddlePaddle. 
 
 ---
-#Text annotations 
+
+# Text annotations 
 
 Below are files and instructions under the directory: 
 
@@ -22,7 +22,7 @@ Below are files and instructions under the directory:
 
 ```
 
-##Brief introduction 
+## Brief introduction 
 Based on automatic description of the neural network, the procedures are as below: 
 
 1.	Download the vgg model of the caffe version. Transform it into the PaddlePaddle version model. Build the image characteristic extraction interface. 
@@ -33,16 +33,16 @@ Based on automatic description of the neural network, the procedures are as belo
 This example is based on the research finding [Show and Tell: A Neural Image Caption Generator](https://arxiv.org/abs/1411.4555) of Oriol Vinyals and so on. They proposed a method for automatic depiction of images by combining image characteristic extraction with Istm. 
 
 
-##Model interpretation 
+## Model interpretation 
 This model is made up of two parts: 
-1.	Part 1 is about image characteristic extraction. This part can use the well-trained image characteristic extraction model shared on the network for simplification of the training iterative time. The image characteristic extraction model used in this example is [vgg16 model] (http://www.robots.ox.ac.uk/%7Evgg/research/very_deep/). 
+1.	Part 1 is about image characteristic extraction. This part can use the well-trained image characteristic extraction model shared on the network for simplification of the training iterative time. The image characteristic extraction model used in this example is [vgg16 model](http://www.robots.ox.ac.uk/%7Evgg/research/very_deep/). 
 2.	Part 2 is about a basic sequence model, which uses the Istm structure for prediction of the word sequence. 
 
 Please refer to [Show and Tell: A Neural Image Caption Generator](https://arxiv.org/abs/1411.4555) for details. 
 
 
 
-###1. Tasks 
+### 1. Tasks 
 **Tasks are shown as below: **
 
 <p align="center">
@@ -54,20 +54,19 @@ The task of this project is to describe the directory of images in short and con
 
 
 
-###2. Model structure 
+### 2. Model structure 
 
-**Sentence approach network: The model structure is shown as below:**
+**The model structure is shown as below:**
 
 <p align="center">
 <img src="images/img2lstm_net.png" width = "90%" align="center"/><br/>
-Fig. 2. Textual classification model of sentence approach network 
+Fig. 2. The network 
 </p>
 The structure consists of two parts. Part 1 is the image characteristic extraction. Part 2 is prediction of the textual sequence using Istm. 
 The image characteristic extraction part can migrate classical network models. In this example, vgg16 model is used for image characteristic extraction. 
 The textual prediction part is actually the Istm structure part. Through realization of PaddlePaddle, please refer to 'network_conf.py' for the structure codes. 
 
-
-##Use PaddlePaddle built-in data for operation 
+## Use PaddlePaddle built-in data for operation 
 
 ### How to prepare vgg16 model
 Enter the directory, caffe2fluid, and download the well-trained vgg16 caffe model file under the directory of caffe2fluid/model_caffe. There are two files in total. They are the model file, [VGG_ILSVRC_16_layers.caffemodel](http://www.robots.ox.ac.uk/~vgg/software/very_deep/caffe/VGG_ILSVRC_16_layers.caffemodel), and the structural file, [VGG_ILSVRC_16_layers.prototxt](https://gist.githubuserdirectory.com/ksimonyan/211839e770f7b538e2d8/raw/0067c9b32f60362c74f4c445a080beed06b07eb3/VGG_ILSVRC_16_layers_deploy.prototxt).
@@ -80,7 +79,7 @@ Please refer to the file, readme, under caffe2fluid.
 
 
 ### How to download images and extract image characteristics 
-In this example, the image characteristics of flickr30k-images are adopted. The data are divided into two parts. The first part [images] is (http://shannon.cs.illinois.edu/DenotationGraph/data/flickr30k-images.tar), and the second part [description] is (http://shannon.cs.illinois.edu/DenotationGraph/data/flickr30k.tar.gz). 
+In this example, the image characteristics of flickr30k-images are adopted. The data are divided into two parts. The first part [images](http://shannon.cs.illinois.edu/DenotationGraph/data/flickr30k-images.tar), and the second part [description](http://shannon.cs.illinois.edu/DenotationGraph/data/flickr30k.tar.gz). 
 Under the root directory, implement `python vgg_infer.py` at the terminal. 
 This part includes image downloading and image characteristic extraction, which might be time-consuming. Finally, the image characteristic collection file will be generated. 
 
@@ -137,8 +136,8 @@ In the following part, the self-defined data interface can be used to read data 
     ```
 
 3. Modification of the command line parameters
--To organize the data in the same format of the sample data, one just needs to modify the `train.py` launch parameter in the 'run.sh' script and designate the 'nn_type' parameter. Then, the operation example can be directly run. There is no need to modify the data reading interface, 'reader.py.'
--Implementation of `python train.py -- help` can acquire detailed instructions of various launch parameters under the script of 'train.py'. Below are introduction of main parameters: 
+-To organize the data in the same format of the sample data, one just needs to modify the `train.py` launch parameter in the `run.sh` script and designate the `nn_type` parameter. Then, the operation example can be directly run. There is no need to modify the data reading interface, `reader.py`
+-Implementation of `python train.py -- help` can acquire detailed instructions of various launch parameters under the script of `train.py`. Below are introduction of main parameters: 
        
         - `train_features_path`: Designate the folder in which the training data are in. Use the self-defined data for training. The parameter must be designated. Otherwise, `Brown corpus` in the Internet is used for training. Meanwhile, `test_data_dir`，`word_dict`，and  `label_dict`  parameters are used in default. 
         - `test_features_path`: Designate the folder which the test data are in. Without designation, the test cannot be conducted, unless the default corpus is used. 
